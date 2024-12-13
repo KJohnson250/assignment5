@@ -1,34 +1,18 @@
-# Stage 1: Builder
-FROM golang:1.19 AS builder
+# Use the latest Fedora image as the base
+FROM fedora:latest
 
-WORKDIR /app
+# Upgrade the system and install the required applications
+RUN dnf -y upgrade && \
+    dnf -y install tuxpaint vim httpd
 
-# Copy the source code and dependencies
-COPY . .
+# Add the myinfo.html file to the container
+COPY myinfo.html /var/www/html/
 
-# Build the application
-RUN go build -o myapp
+# Expose port 80 for HTTP traffic
+EXPOSE 80/TCP
 
-# Stage 2: Final
-FROM alpine:latest
+# Enable the httpd service
+ENTRYPOINT ["/usr/sbin/httpd", "-DFOREGROUND"]
 
-WORKDIR /app
-
-# Copy the built application from the builder stage
-COPY --from=builder /app/myapp .
-
-# Command to run the application
-CMD ["./myapp"]
-
-# Stage 2: Final
-FROM alpine:latest
-
-WORKDIR /app
-
-# Copy the built application from the builder stage
-COPY --from=builder /app/myapp .
-
-# Command to run the application
-CMD ["./myapp"]
 
 
